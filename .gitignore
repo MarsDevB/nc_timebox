@@ -1,0 +1,9 @@
+node_modules/
+js/timebox-main.js.map
+js/timebox-main.js.LICENSE.txt
+css/timebox.css.map
+.DS_Store
+*.swp
+*.swo
+*~
+.vite

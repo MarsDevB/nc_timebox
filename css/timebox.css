@@ -1,0 +1,114 @@
+/**
+ * Nextcloud - TimeBox
+ *
+ * Global styles for the TimeBox app
+ */
+
+#timebox-app-content {
+	display: flex;
+	height: 100vh;
+	width: 100%;
+}
+
+/* Reset and base styles */
+.timebox-main {
+	font-family: var(--font-face);
+	color: var(--color-main-text);
+}
+
+/* Buttons */
+.primary {
+	background-color: var(--color-primary);
+	color: var(--color-primary-text);
+	border: none;
+	padding: 8px 16px;
+	border-radius: var(--border-radius);
+	cursor: pointer;
+	font-size: 14px;
+	transition: background-color 0.2s;
+}
+
+.primary:hover {
+	background-color: var(--color-primary-hover);
+}
+
+.primary:active {
+	background-color: var(--color-primary-dark);
+}
+
+/* General button reset */
+button {
+	font-family: var(--font-face);
+}
+
+/* Input fields */
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+	padding: 8px 12px;
+	border: 1px solid var(--color-border-maxcontrast);
+	border-radius: var(--border-radius);
+	background-color: var(--color-main-background);
+	color: var(--color-main-text);
+	font-size: 14px;
+	width: 100%;
+	box-sizing: border-box;
+	transition: border-color 0.2s;
+}
+
+input[type="text"]:focus,
+select:focus,
+textarea:focus {
+	border-color: var(--color-primary);
+	outline: none;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+	width: 6px;
+}
+
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	background-color: var(--color-border-maxcontrast);
+	border-radius: 3px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+.fade-enter-active {
+	animation: fadeIn 0.3s ease;
+}
+
+/* Loading spinner fallback */
+.timebox-loading {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100px;
+	color: var(--color-text-maxcontrast);
+}
+
+.timebox-loading::after {
+	content: '';
+	display: inline-block;
+	width: 32px;
+	height: 32px;
+	border: 3px solid var(--color-border);
+	border-top-color: var(--color-primary);
+	border-radius: 50%;
+	animation: spin 0.8s linear infinite;
+	margin-right: 12px;
+}
+
+@keyframes spin {
+	to { transform: rotate(360deg); }
+}
