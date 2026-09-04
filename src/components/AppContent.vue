@@ -14,6 +14,8 @@ export default {
 .app-content {
 	flex: 1 1 auto;
 	height: 100%;
+	width: 100%;
 	overflow-y: auto;
+	background-color: var(--color-main-background);
 }
 </style>

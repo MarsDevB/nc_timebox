@@ -1,5 +1,5 @@
 <template>
-	<div id="timebox-app-content">
+	<div id="timebox-app-content" class="timebox-app-wrapper">
 		<AppNavigation>
 			<template #list>
 				<TimeBoxList
@@ -28,10 +28,13 @@
 						:items="activeItems"
 						:calendar-events="state.calendarEvents"
 						:tasks="state.tasks"
+						:max-items="maxItems"
+						:max-events="maxEvents"
 						@update="handleUpdateTimebox"
 						@delete-item="handleDeleteItem"
 						@add-item="handleAddItem"
 						@reorder-items="handleReorderItems"
+						@toggle-item="handleToggleItem"
 					/>
 				</template>
 				<div v-else class="empty-state">
@@ -45,8 +48,9 @@
 </template>
 
 <script>
-import { onMounted, computed } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import store from './store/index.js'
+import api from './services/api.js'
 import AppNavigation from './components/AppNavigation.vue'
 import AppContent from './components/AppContent.vue'
 import TimeBoxList from './components/TimeBoxList.vue'
@@ -63,7 +67,31 @@ export default {
 	setup() {
 		const { state, ...actions } = store
 
+		function loadInitialInt(key, fallback) {
+			try {
+				const value = window.OCP?.InitialState?.loadValue?.('timebox', key)
+				const parsed = parseInt(value, 10)
+				return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback
+			} catch (e) {
+				return fallback
+			}
+		}
+		const maxItems = ref(loadInitialInt('maxItems', 50))
+		const maxEvents = ref(loadInitialInt('maxEvents', 50))
+
 		onMounted(async () => {
+			// Load limits from the API (source of truth) – falls back to initial state values
+			try {
+				const settings = await api.getSettings()
+				if (Number.isFinite(parseInt(settings?.maxItems, 10)) && parseInt(settings.maxItems, 10) > 0) {
+					maxItems.value = parseInt(settings.maxItems, 10)
+				}
+				if (Number.isFinite(parseInt(settings?.maxEvents, 10)) && parseInt(settings.maxEvents, 10) > 0) {
+					maxEvents.value = parseInt(settings.maxEvents, 10)
+				}
+			} catch (e) {
+				// Keep initial state / default values
+			}
 			await actions.fetchTimeboxes()
 			await actions.fetchCalendarEvents()
 			await actions.fetchTasks()
@@ -106,6 +134,10 @@ export default {
 			await actions.reorderItems(timeboxId, itemIds)
 		}
 
+		async function handleToggleItem(timeboxId, itemId, data) {
+			await actions.updateItem(timeboxId, itemId, data)
+		}
+
 		function setActiveTimebox(id) {
 			actions.setActiveTimebox(id)
 		}
@@ -114,6 +146,8 @@ export default {
 			state,
 			activeTimebox,
 			activeItems,
+			maxItems,
+			maxEvents,
 			setActiveTimebox,
 			handleCreateTimebox,
 			handleUpdateTimebox,
@@ -121,6 +155,7 @@ export default {
 			handleAddItem,
 			handleDeleteItem,
 			handleReorderItems,
+			handleToggleItem,
 		}
 	},
 }
@@ -128,8 +163,10 @@ export default {
 
 <style scoped>
 .timebox-main {
-	padding: 20px;
+	padding: 0;
 	height: 100%;
+	display: flex;
+	flex-direction: column;
 }
 
 .loading-indicator {

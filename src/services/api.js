@@ -57,4 +57,13 @@ export default {
 	getTasks() {
 		return axios.get(`${BASE_URL}/tasks`).then(res => res.data)
 	},
+
+	// User settings
+	getSettings() {
+		return axios.get(`${BASE_URL}/settings`).then(res => res.data)
+	},
+
+	saveSettings(data) {
+		return axios.post(`${BASE_URL}/settings`, data).then(res => res.data)
+	},
 }

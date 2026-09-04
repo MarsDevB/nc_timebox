@@ -18,6 +18,7 @@
 				type="text"
 				placeholder="TimeBox name..."
 				class="timebox-list__input"
+				@input="onTitleInput"
 				@keyup.enter="createTimebox"
 				ref="titleInput"
 			/>
@@ -44,7 +45,7 @@
 				<span class="timebox-list__color-dot" :style="{ backgroundColor: tb.color }"></span>
 				<span class="timebox-list__item-title">{{ tb.title }}</span>
 				<button
-					class="timebox-list__delete icon-delete"
+					class="timebox-list__delete"
 					@click.stop="confirmDelete(tb.id)"
 					title="Delete timebox"
 				>
@@ -98,6 +99,30 @@ export default {
 			newColor.value = '#0082c9'
 		}
 
+		function todayDateString() {
+			const now = new Date()
+			const year = now.getFullYear()
+			const month = String(now.getMonth() + 1).padStart(2, '0')
+			const day = String(now.getDate()).padStart(2, '0')
+			return `${year}-${month}-${day}`
+		}
+
+		function onTitleInput() {
+			if (newTitle.value.includes('#')) {
+				const input = titleInput.value
+				const cursorBefore = input ? input.selectionStart : null
+				const charsBeforeCursor = newTitle.value.slice(0, cursorBefore).length
+				const replaced = newTitle.value.replace(/#/g, todayDateString())
+				newTitle.value = replaced
+				// Move the caret after the inserted date at the cursor position
+				if (input && cursorBefore !== null) {
+					const offset = todayDateString().length - 1
+					const pos = charsBeforeCursor + offset
+					nextTick(() => input.setSelectionRange(pos, pos))
+				}
+			}
+		}
+
 		function confirmDelete(id) {
 			if (confirm('Are you sure you want to delete this timebox?')) {
 				emit('delete', id)
@@ -112,6 +137,7 @@ export default {
 			createTimebox,
 			cancelCreate,
 			confirmDelete,
+			onTitleInput,
 		}
 	},
 }

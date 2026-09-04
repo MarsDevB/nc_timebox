@@ -7,12 +7,12 @@ namespace OCA\TimeBox\Controller;
 
 use OCA\TimeBox\Db\TimeBox;
 use OCA\TimeBox\Db\TimeBoxMapper;
-use OCP\AppFramework\ApiController;
+use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\IRequest;
 
-class TimeboxController extends ApiController {
+class TimeboxController extends Controller {
 	protected TimeBoxMapper $mapper;
 	protected string $userId;
 

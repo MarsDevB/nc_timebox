@@ -1,13 +1,15 @@
-/**
- * Nextcloud - TimeBox
- *
- * Global styles for the TimeBox app
- */
-
-#timebox-app-content {
+#timebox-app,
+#timebox-app-content,
+.timebox-app-wrapper {
 	display: flex;
-	height: 100vh;
+	height: 100%;
 	width: 100%;
+	background-color: var(--color-main-background);
+	box-sizing: border-box;
+}
+
+.timebox-app-wrapper * {
+	box-sizing: border-box;
 }
 
 /* Reset and base styles */

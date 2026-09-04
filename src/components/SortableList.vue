@@ -15,9 +15,17 @@
 						'sortable-list__item--task': element.itemType === 'task',
 						'sortable-list__item--event': element.itemType === 'event',
 						'sortable-list__item--note': element.itemType === 'note',
+						'sortable-list__item--completed': element.completed,
 					}"
 				>
 					<span class="sortable-list__handle" title="Drag to reorder">⠿</span>
+					<input
+						type="checkbox"
+						class="sortable-list__checkbox"
+						:checked="element.completed"
+						@change="$emit('toggle-completed', element)"
+						title="Mark as completed"
+					/>
 					<span class="sortable-list__icon">
 						<template v-if="element.itemType === 'task'">☑</template>
 						<template v-else-if="element.itemType === 'event'">📅</template>
@@ -53,7 +61,7 @@ export default {
 			default: () => [],
 		},
 	},
-	emits: ['reorder', 'delete'],
+	emits: ['reorder', 'delete', 'toggle-completed'],
 	setup(props, { emit }) {
 		const localItems = ref([...props.items])
 
@@ -88,7 +96,7 @@ export default {
 	border: 1px solid var(--color-border);
 	border-radius: var(--border-radius);
 	gap: 8px;
-	transition: box-shadow 0.2s, transform 0.2s;
+	transition: box-shadow 0.2s, transform 0.2s, opacity 0.2s;
 }
 
 .sortable-list__item:hover {
@@ -107,6 +115,15 @@ export default {
 	border-left: 4px solid var(--color-warning);
 }
 
+.sortable-list__item--completed {
+	opacity: 0.6;
+}
+
+.sortable-list__item--completed .sortable-list__title {
+	text-decoration: line-through;
+	color: var(--color-text-maxcontrast);
+}
+
 .sortable-list__handle {
 	cursor: grab;
 	font-size: 18px;
@@ -117,6 +134,14 @@ export default {
 
 .sortable-list__handle:active {
 	cursor: grabbing;
+}
+
+.sortable-list__checkbox {
+	flex-shrink: 0;
+	width: 18px;
+	height: 18px;
+	cursor: pointer;
+	accent-color: var(--color-success);
 }
 
 .sortable-list__icon {

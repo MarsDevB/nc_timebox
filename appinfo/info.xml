@@ -5,7 +5,7 @@
     <name>TimeBox</name>
     <summary>Organize tasks and calendar events into timeboxes</summary>
     <description><![CDATA[The TimeBox app lets you create focused time blocks and organize your tasks and calendar events into them. Sort and prioritize your work by dragging items into timeboxes for structured productivity.]]></description>
-    <version>0.1.0</version>
+    <version>0.2.3</version>
     <licence>agpl</licence>
     <author>TimeBox Contributors</author>
     <namespace>TimeBox</namespace>
@@ -14,6 +14,9 @@
     <dependencies>
         <nextcloud min-version="28" max-version="34" />
     </dependencies>
+    <settings>
+        <personal>OCA\TimeBox\Settings\Personal</personal>
+    </settings>
     <navigations>
         <navigation>
             <name>TimeBox</name>

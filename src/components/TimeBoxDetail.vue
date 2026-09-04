@@ -29,6 +29,7 @@
 					:items="items"
 					@reorder="handleReorder"
 					@delete="handleDeleteItem"
+					@toggle-completed="handleToggleCompleted"
 				/>
 				<div v-if="items.length === 0" class="timebox-detail__empty-column">
 					<p>Drag tasks or events here, or add from the right panel.</p>
@@ -41,41 +42,6 @@
 					📅 Available Items
 				</h3>
 
-				<div class="timebox-detail__source-section">
-					<h4 class="timebox-detail__source-heading">Tasks</h4>
-					<ul class="timebox-detail__source-list" v-if="tasks.length > 0">
-						<li
-							v-for="task in tasks"
-							:key="'task-' + (task.id || task.uri)"
-							class="timebox-detail__source-item timebox-detail__source-item--task"
-							@click="addTaskToTimebox(task)"
-						>
-							<span class="timebox-detail__item-icon">☑</span>
-							<span class="timebox-detail__item-name">{{ task.summary }}</span>
-							<button class="timebox-detail__add-btn" title="Add to timebox">+</button>
-						</li>
-					</ul>
-					<p v-else class="timebox-detail__no-items">No tasks found</p>
-				</div>
-
-				<div class="timebox-detail__source-section">
-					<h4 class="timebox-detail__source-heading">Calendar Events</h4>
-					<ul class="timebox-detail__source-list" v-if="calendarEvents.length > 0">
-						<li
-							v-for="event in calendarEvents"
-							:key="'event-' + (event.id || event.uri)"
-							class="timebox-detail__source-item timebox-detail__source-item--event"
-							@click="addEventToTimebox(event)"
-						>
-							<span class="timebox-detail__item-icon">📅</span>
-							<span class="timebox-detail__item-name">{{ event.summary }}</span>
-							<button class="timebox-detail__add-btn" title="Add to timebox">+</button>
-						</li>
-					</ul>
-					<p v-else class="timebox-detail__no-items">No calendar events found</p>
-				</div>
-
-				<!-- Manual add -->
 				<div class="timebox-detail__source-section">
 					<h4 class="timebox-detail__source-heading">Add Custom Item</h4>
 					<div class="timebox-detail__manual-add">
@@ -94,13 +60,53 @@
 						<button class="primary" @click="addManualItem">Add</button>
 					</div>
 				</div>
+
+				<div class="timebox-detail__source-section">
+					<h4 class="timebox-detail__source-heading">Tasks</h4>
+					<ul class="timebox-detail__source-list" v-if="sortedTasks.length > 0">
+						<li
+							v-for="task in sortedTasks"
+							:key="'task-' + (task.id || task.uri)"
+							class="timebox-detail__source-item timebox-detail__source-item--task"
+							@click="addTaskToTimebox(task)"
+						>
+							<span class="timebox-detail__item-icon">☑</span>
+							<span class="timebox-detail__item-name">{{ task.summary }}</span>
+							<span v-if="task.due" class="timebox-detail__item-date" :class="{ 'timebox-detail__item-date--overdue': isOverdue(task.due) }">
+								{{ formatDate(task.due) }}
+							</span>
+							<button class="timebox-detail__add-btn" title="Add to timebox">+</button>
+						</li>
+					</ul>
+					<p v-else class="timebox-detail__no-items">No tasks found</p>
+				</div>
+
+				<div class="timebox-detail__source-section">
+					<h4 class="timebox-detail__source-heading">Calendar Events</h4>
+					<ul class="timebox-detail__source-list" v-if="sortedEvents.length > 0">
+						<li
+							v-for="event in sortedEvents"
+							:key="'event-' + (event.id || event.uri)"
+							class="timebox-detail__source-item timebox-detail__source-item--event"
+							@click="addEventToTimebox(event)"
+						>
+							<span class="timebox-detail__item-icon">📅</span>
+							<span class="timebox-detail__item-name">{{ event.summary }}</span>
+							<span v-if="event.start" class="timebox-detail__item-date" :class="{ 'timebox-detail__item-date--past': isPast(event.end || event.start) }">
+								{{ formatEventTime(event) }}
+							</span>
+							<button class="timebox-detail__add-btn" title="Add to timebox">+</button>
+						</li>
+					</ul>
+					<p v-else class="timebox-detail__no-items">No calendar events found</p>
+				</div>
 			</div>
 		</div>
 	</div>
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import SortableList from './SortableList.vue'
 
 export default {
@@ -125,14 +131,97 @@ export default {
 			type: Array,
 			default: () => [],
 		},
+		maxItems: {
+			type: Number,
+			default: 50,
+		},
+		maxEvents: {
+			type: Number,
+			default: 50,
+		},
 	},
-	emits: ['update', 'delete-item', 'add-item', 'reorder-items'],
+	emits: ['update', 'delete-item', 'add-item', 'reorder-items', 'toggle-item'],
 	setup(props, { emit }) {
 		const editing = ref(false)
 		const editTitle = ref('')
 		const editInput = ref(null)
 		const manualTitle = ref('')
 		const manualType = ref('task')
+
+		// Sort by due/start date ascending; items without a date go last
+		const sortedTasks = computed(() =>
+			[...props.tasks].sort((a, b) => {
+				const da = a.due ? new Date(a.due).getTime() : Infinity
+				const db = b.due ? new Date(b.due).getTime() : Infinity
+				return da - db
+			}).slice(0, props.maxItems)
+		)
+
+		const sortedEvents = computed(() =>
+			[...props.calendarEvents]
+				// Only keep events that end today or in the future
+				.filter((event) => {
+					try {
+						const endOrStart = event.end || event.start
+						if (!endOrStart) return true
+						const end = new Date(endOrStart)
+						const today = new Date()
+						today.setHours(0, 0, 0, 0)
+						return end.getTime() >= today.getTime()
+					} catch (e) {
+						return true
+					}
+				})
+				.sort((a, b) => {
+					const da = a.start ? new Date(a.start).getTime() : Infinity
+					const db = b.start ? new Date(b.start).getTime() : Infinity
+					return da - db
+				})
+				.slice(0, props.maxEvents)
+		)
+
+		function formatDate(iso) {
+			try {
+				const d = new Date(iso)
+				return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' }) +
+					', ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
+			} catch (e) {
+				return ''
+			}
+		}
+
+		function formatEventTime(event) {
+			try {
+				const start = new Date(event.start)
+				const parts = [start.toLocaleDateString(undefined, { day: '2-digit', month: 'short' })]
+				if (event.end) {
+					const end = new Date(event.end)
+					const sameDay = start.toDateString() === end.toDateString()
+					if (sameDay) {
+						// Same day: "04. Sep, 10:00 – 11:00"
+						return parts[0] + ', ' + start.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) +
+							' – ' + end.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
+					}
+					// Multi-day: "04. Sep – 05. Sep"
+					return parts[0] + ' – ' + end.toLocaleDateString(undefined, { day: '2-digit', month: 'short' })
+				}
+				return parts[0]
+			} catch (e) {
+				return ''
+			}
+		}
+
+		function isOverdue(iso) {
+			try {
+				return new Date(iso).getTime() < Date.now()
+			} catch (e) {
+				return false
+			}
+		}
+
+		function isPast(iso) {
+			return isOverdue(iso)
+		}
 
 		function startEdit() {
 			editing.value = true
@@ -159,7 +248,7 @@ export default {
 				itemType: 'task',
 				title: task.summary || 'Untitled Task',
 				description: task.description || '',
-				itemSourceId: task.id || task.uri || '',
+				itemSourceId: String(task.id ?? task.uri ?? ''),
 				calendarUri: task.calendarUri || '',
 				taskUid: task.uri || '',
 			})
@@ -170,7 +259,7 @@ export default {
 				itemType: 'event',
 				title: event.summary || 'Untitled Event',
 				description: event.description || '',
-				itemSourceId: event.id || event.uri || '',
+				itemSourceId: String(event.id ?? event.uri ?? ''),
 				calendarUri: event.calendarUri || '',
 				taskUid: '',
 			})
@@ -197,6 +286,13 @@ export default {
 			emit('delete-item', props.timebox.id, itemId)
 		}
 
+		function handleToggleCompleted(item) {
+			emit('toggle-item', props.timebox.id, item.id, {
+				...item,
+				completed: !item.completed,
+			})
+		}
+
 		return {
 			editing,
 			editTitle,
@@ -211,6 +307,13 @@ export default {
 			addManualItem,
 			handleReorder,
 			handleDeleteItem,
+			handleToggleCompleted,
+			sortedTasks,
+			sortedEvents,
+			formatDate,
+			formatEventTime,
+			isOverdue,
+			isPast,
 		}
 	},
 }
@@ -219,11 +322,14 @@ export default {
 <style scoped>
 .timebox-detail {
 	height: 100%;
+	display: flex;
+	flex-direction: column;
 }
 
 .timebox-detail__header {
 	padding: 20px 20px 10px;
 	border-bottom: 1px solid var(--color-border);
+	flex-shrink: 0;
 }
 
 .timebox-detail__title-row {
@@ -273,7 +379,8 @@ export default {
 	display: flex;
 	gap: 20px;
 	padding: 20px;
-	height: calc(100% - 80px);
+	flex: 1;
+	min-height: 0;
 }
 
 .timebox-detail__column {
@@ -362,6 +469,24 @@ export default {
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	font-size: 14px;
+}
+
+.timebox-detail__item-date {
+	font-size: 12px;
+	color: var(--color-text-maxcontrast);
+	white-space: nowrap;
+	background-color: var(--color-background-dark);
+	border-radius: var(--border-radius);
+	padding: 1px 6px;
+}
+
+.timebox-detail__item-date--overdue {
+	color: var(--color-error);
+	font-weight: 600;
+}
+
+.timebox-detail__item-date--past {
+	opacity: 0.6;
 }
 
 .timebox-detail__add-btn {

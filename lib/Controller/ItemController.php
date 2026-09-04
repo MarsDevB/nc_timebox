@@ -7,12 +7,12 @@ namespace OCA\TimeBox\Controller;
 
 use OCA\TimeBox\Db\TimeBoxItem;
 use OCA\TimeBox\Db\TimeBoxItemMapper;
-use OCP\AppFramework\ApiController;
+use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\IRequest;
 
-class ItemController extends ApiController {
+class ItemController extends Controller {
 	protected TimeBoxItemMapper $mapper;
 	protected string $userId;
 
@@ -33,7 +33,7 @@ class ItemController extends ApiController {
 	/**
 	 * @NoAdminRequired
 	 */
-	public function create(int $timeboxId, string $itemType, string $title, string $description = '', string $itemSourceId = '', string $calendarUri = '', string $taskUid = '', int $sortOrder = 0): DataResponse {
+	public function create(int $timeboxId, string $itemType, string $title, string $description = '', string $itemSourceId = '', string $calendarUri = '', string $taskUid = '', int $sortOrder = 0, bool $completed = false): DataResponse {
 		$item = new TimeBoxItem();
 		$item->setTimeboxId($timeboxId);
 		$item->setItemType($itemType);
@@ -43,6 +43,7 @@ class ItemController extends ApiController {
 		$item->setCalendarUri($calendarUri);
 		$item->setTaskUid($taskUid);
 		$item->setSortOrder($sortOrder);
+		$item->setCompleted($completed);
 		$item = $this->mapper->insert($item);
 		return new DataResponse($item);
 	}
@@ -50,7 +51,7 @@ class ItemController extends ApiController {
 	/**
 	 * @NoAdminRequired
 	 */
-	public function update(int $timeboxId, int $id, string $itemType, string $title, string $description = '', string $itemSourceId = '', string $calendarUri = '', string $taskUid = '', int $sortOrder = 0): DataResponse {
+	public function update(int $timeboxId, int $id, string $itemType, string $title, string $description = '', string $itemSourceId = '', string $calendarUri = '', string $taskUid = '', int $sortOrder = 0, bool $completed = false): DataResponse {
 		try {
 			$item = $this->mapper->findById($id);
 		} catch (\OCP\AppFramework\Db\DoesNotExistException $e) {
@@ -64,6 +65,7 @@ class ItemController extends ApiController {
 		$item->setCalendarUri($calendarUri);
 		$item->setTaskUid($taskUid);
 		$item->setSortOrder($sortOrder);
+		$item->setCompleted($completed);
 		$item = $this->mapper->update($item);
 		return new DataResponse($item);
 	}

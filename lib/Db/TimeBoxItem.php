@@ -24,6 +24,8 @@ use OCP\AppFramework\Db\Entity;
  * @method void setCalendarUri(string $calendarUri)
  * @method string getTaskUid()
  * @method void setTaskUid(string $taskUid)
+ * @method bool getCompleted()
+ * @method void setCompleted(bool $completed)
  */
 class TimeBoxItem extends Entity implements \JsonSerializable {
 	protected $timeboxId;
@@ -34,10 +36,12 @@ class TimeBoxItem extends Entity implements \JsonSerializable {
 	protected $sortOrder = 0;
 	protected $calendarUri = '';
 	protected $taskUid = '';
+	protected $completed = false;
 
 	public function __construct() {
 		$this->addType('timeboxId', 'integer');
 		$this->addType('sortOrder', 'integer');
+		$this->addType('completed', 'boolean');
 	}
 
 	#[\ReturnTypeWillChange]
@@ -52,6 +56,7 @@ class TimeBoxItem extends Entity implements \JsonSerializable {
 			'sortOrder' => $this->sortOrder,
 			'calendarUri' => $this->calendarUri,
 			'taskUid' => $this->taskUid,
+			'completed' => $this->completed,
 		];
 	}
 }
