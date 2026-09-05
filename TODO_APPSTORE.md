@@ -3,29 +3,26 @@
 Stand: 2026-09-04 · Code: Commit `d31d802` auf `master`, Tag `v1.0.0` ✅
 
 ## 1. LICENSE ergänzen (PFlicht)
-- [ ] Datei `LICENSE` (oder `COPYING`) im App-Root mit AGPL-v3-Text anlegen
-- [ ] Quelle: https://www.gnu.org/licenses/agpl-3.0.txt
+- [x] Datei `LICENSE` im App-Root mit AGPL-v3-Text anlegen ✅ (erledigt)
 
 ## 2. Git-Repository veröffentlichen (Pflicht)
-- [ ] Public-Repo auf GitHub/GitLab erstellen (z. B. `github.com/<user>/timebox`)
-- [ ] `git remote add origin <URL>` im App-Ordner
+- [ ] Public-Repo `github.com/MarsDevB/nc_timebox` erstellen
+- [ ] `git remote add origin git@github.com:MarsDevB/nc_timebox.git`
 - [ ] Push: `git push -u origin master --tags` (Tag `v1.0.0` mitschieben)
-- [ ] GitHub **Release** für Tag `v1.0.0` anlegen (Release-Notes aus Commit-Message übernehmen)
+- [ ] GitHub **Release** für Tag `v1.0.0` anlegen – Workflow `.github/workflows/build.yml` hängt automatisch den Tarball (`dist/timebox-1.0.0.tar.gz`) als Asset an
 
 ## 3. info.xml ergänzen (Pflicht/empfohlen)
-- [ ] `<version>1.0.0</version>` (statt 0.2.3 – passend zum Tag)
-- [ ] `<author>` mit echtem Namen (+ optional `<author><email>` )
-- [ ] `<website>` → Repo-URL
-- [ ] `<bugs>` → Repo-Issues-URL
-- [ ] `<repository type="git">` → Repo-URL
+- [x] `<version>1.0.0</version>` ✅
+- [x] `<author>MarsDevB</author>` ✅
+- [x] `<website>` → https://github.com/MarsDevB/nc_timebox ✅
+- [x] `<bugs>` → https://github.com/MarsDevB/nc_timebox/issues ✅
+- [x] `<repository type="git">` → https://github.com/MarsDevB/nc_timebox.git ✅
 - [ ] optional: `<screenshot>` URLs (Screenshots zuerst hochladen, siehe Punkt 5)
 
 ## 4. Build/Release-Mechanismus (Pflicht)
-- [ ] `Makefile` mit Target `dist` anlegen:
-      `npm ci && npx vite build` → App-Ordner als Tarball packen
-- [ ] Der App Store baut das Release selbst aus dem Git-Tag (via nextcloud.com),
-      alternativ Tarball beim GitHub Release als Asset hochladen
-- [ ] Empfohlen: GitHub-Actions-Workflow (build + lint bei jedem Push)
+- [x] `Makefile` mit Target `dist` angelegt (`npm ci && npx vite build` → Tarball `dist/timebox-<version>.tar.gz` mit Top-Level-Ordner `timebox/`) ✅ – getestet
+- [x] GitHub-Actions-Workflow `.github/workflows/build.yml` (build + xmllint + php -l bei jedem Push; Release-Asset bei Tags) ✅
+- [x] Tarball lokal getestet: `make dist` → `dist/timebox-1.0.0.tar.gz` (144K, sauberer Inhalt) ✅
 
 ## 5. Screenshots & Doku (empfohlen)
 - [ ] 1–3 Screenshots der App erstellen (PNG, ideal 1350×770)
@@ -41,7 +38,7 @@ Stand: 2026-09-04 · Code: Commit `d31d802` auf `master`, Tag `v1.0.0` ✅
 - [ ] ⚠️ Muss bei JEDEM Release neu gemacht werden (Versionsnummer ändert sich!)
 
 ## 7. L10n ergänzen (empfohlen)
-- [ ] Neue Strings in `l10n/de.json` und `en.json` aufnehmen, u. a.:
+- [x] Neue Strings in `l10n/de.json` und `en.json` aufgenommen ✅:
   - "Limit how many items and calendar events are shown in the TimeBox app."
   - "Maximum number of items displayed"
   - "Maximum number of calendar events displayed"

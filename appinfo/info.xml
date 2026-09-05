@@ -5,10 +5,13 @@
     <name>TimeBox</name>
     <summary>Organize tasks and calendar events into timeboxes</summary>
     <description><![CDATA[The TimeBox app lets you create focused time blocks and organize your tasks and calendar events into them. Sort and prioritize your work by dragging items into timeboxes for structured productivity.]]></description>
-    <version>0.2.3</version>
+    <version>1.0.0</version>
     <licence>agpl</licence>
-    <author>TimeBox Contributors</author>
+    <author>MarsDevB</author>
     <namespace>TimeBox</namespace>
+    <website>https://github.com/MarsDevB/nc_timebox</website>
+    <bugs>https://github.com/MarsDevB/nc_timebox/issues</bugs>
+    <repository type="git">https://github.com/MarsDevB/nc_timebox.git</repository>
     <category>office</category>
     <category>organization</category>
     <dependencies>
