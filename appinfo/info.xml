@@ -17,6 +17,11 @@
     <dependencies>
         <nextcloud min-version="28" max-version="34" />
     </dependencies>
+    <screenshots>
+        <screenshot small-thumbnail="https://raw.githubusercontent.com/MarsDevB/nc_timebox/master/docs/img/timebox-main.png">
+            https://raw.githubusercontent.com/MarsDevB/nc_timebox/master/docs/img/timebox-main.png
+        </screenshot>
+    </screenshots>
     <settings>
         <personal>OCA\TimeBox\Settings\Personal</personal>
     </settings>
