@@ -1,15 +1,15 @@
 # TimeBox – TODO: Veröffentlichung im Nextcloud App Store
 
-Stand: 2026-09-04 · Code: Commit `d31d802` auf `master`, Tag `v1.0.0` ✅
+Stand: 2026-09-05 · Repo: https://github.com/MarsDevB/nc_timebox (master gepusht, Tag v1.0.0, GitHub-Release als Pre-release, Workflow grün ✅)
 
 ## 1. LICENSE ergänzen (PFlicht)
 - [x] Datei `LICENSE` im App-Root mit AGPL-v3-Text anlegen ✅ (erledigt)
 
 ## 2. Git-Repository veröffentlichen (Pflicht)
-- [ ] Public-Repo `github.com/MarsDevB/nc_timebox` erstellen
-- [ ] `git remote add origin git@github.com:MarsDevB/nc_timebox.git`
-- [ ] Push: `git push -u origin master --tags` (Tag `v1.0.0` mitschieben)
-- [ ] GitHub **Release** für Tag `v1.0.0` anlegen – Workflow `.github/workflows/build.yml` hängt automatisch den Tarball (`dist/timebox-1.0.0.tar.gz`) als Asset an
+- [x] Public-Repo `github.com/MarsDevB/nc_timebox` erstellt ✅
+- [x] `git remote add origin git@github.com:MarsDevB/nc_timebox.git` ✅
+- [x] Push: `git push -u origin master --tags` ✅ (Default-Branch im Repo auf `master` setzen!)
+- [x] GitHub **Release** für Tag `v1.0.0` angelegt (als **Pre-release** markiert) – Workflow `.github/workflows/build.yml` baut grün und hängt den Tarball (`dist/timebox-1.0.0.tar.gz`) als Asset an ✅
 
 ## 3. info.xml ergänzen (Pflicht/empfohlen)
 - [x] `<version>1.0.0</version>` ✅
@@ -30,12 +30,45 @@ Stand: 2026-09-04 · Code: Commit `d31d802` auf `master`, Tag `v1.0.0` ✅
 - [ ] In `info.xml` unter `<screenshots>` eintragen
 
 ## 6. App-Signatur (Pflicht für Store)
-- [ ] Account auf https://apps.nextcloud.com (mit GitHub-Login)
-- [ ] Zertifikat für App-ID `timebox` beantragen (CSR mit openssl, Anleitung:
-      https://nextcloud-server.netlify.app/ „Code signing“ bzw. Developer Docs)
-- [ ] Signieren: `occ integrity:sign-app --path=... --certificateFile=... --privateKeyFile=...`
-- [ ] Erzeugt `appinfo/certificate.pem` + `signature.json` → committen
-- [ ] ⚠️ Muss bei JEDEM Release neu gemacht werden (Versionsnummer ändert sich!)
+- [ ] Schlüssel + CSR lokal erzeugen:
+      ```bash
+      mkdir -p ~/.nextcloud/certificates
+      openssl req -nodes -newkey rsa:4096 \
+        -keyout ~/.nextcloud/certificates/timebox.key \
+        -out ~/.nextcloud/certificates/timebox.csr \
+        -subj "/CN=timebox"
+      ```
+- [ ] Zertifikat beantragen via Pull Request auf
+      **https://github.com/nextcloud/app-certificate-requests**
+      (GitHub-Web-Interface: „Create new file" → Datei `timebox/timebox.csr` nennen →
+      CSR-Inhalt einfügen → committen → Pull Request öffnen.
+      Nice to have: Link zur App-Source, also https://github.com/MarsDevB/nc_timebox.
+      Keine Person mentionen – Subscriber kommen von selbst.)
+- [ ] Nach Merge: Zertifikat von apps.nextcloud.com abrufen / PR-Antwort entnehmen →
+      speichern als `~/.nextcloud/certificates/timebox.crt`
+- [ ] App-Registrierung auf https://apps.nextcloud.com (GitHub-Login), Formular füllen:
+      - **Public certificate**: kompletter Inhalt der `timebox.crt` (mit BEGIN/END-Zeilen)
+      - **Signature over your app's ID**:
+        ```bash
+        echo -n "timebox" | openssl dgst -sha512 -sign ~/.nextcloud/certificates/timebox.key | openssl base64
+        ```
+      - ⚠️ `.key` NIEMALS hochladen, `.csr` nur im Zertifikats-PR!
+      - ⚠️ Zertifikat-Update im Formular löscht alle vorhandenen Releases → Key sicher backupen!
+- [ ] Signieren (im Nextcloud-Container, wo `occ` läuft):
+      ```bash
+      occ integrity:sign-app \
+        --path=/pfad/zu/custom_apps/timebox \
+        --certificateFile=~/.nextcloud/certificates/timebox.crt \
+        --privateKeyFile=~/.nextcloud/certificates/timebox.key
+      ```
+- [ ] Erzeugt `appinfo/certificate.pem` + `appinfo/signature.json` → committen
+- [ ] Tag `v1.0.0` auf den Signatur-Commit verschieben und pushen:
+      ```bash
+      git tag -f v1.0.0 -m "Release 1.0.0"
+      git push origin master v1.0.0 --force
+      ```
+- [ ] ⚠️ Muss bei JEDEM Release neu gemacht werden (Versionsnummer ändert sich!) –
+      Reihenfolge immer: **erst signieren, dann Tarball bauen / Tag pushen**
 
 ## 7. L10n ergänzen (empfohlen)
 - [x] Neue Strings in `l10n/de.json` und `en.json` aufgenommen ✅:
@@ -44,11 +77,14 @@ Stand: 2026-09-04 · Code: Commit `d31d802` auf `master`, Tag `v1.0.0` ✅
   - "Maximum number of calendar events displayed"
 
 ## 8. App Store Einreichung
-- [ ] https://apps.nextcloud.com → „Publish your app“ → Repo-URL + Tag angeben
+- [ ] https://apps.nextcloud.com → „Publish your app“ → Repo-URL `MarsDevB/nc_timebox` + Tag `v1.0.0` angeben
+      (alternativ: fertigen Tarball `dist/timebox-1.0.0.tar.gz` hochladen – Signatur steckt dann bereits
+      in `appinfo/signature.json` im Tarball; gefragt nach Zertifikat → `timebox.crt`, nie `.key`/`.csr`)
 - [ ] Review abwarten (Moderation prüft Code, Lizenz, Security; dauert meist Tage)
+- [ ] Nach Review-Freigabe: GitHub-Release von „Pre-release" auf „Latest" umstellen
 
 ## Bereits vorhanden ✅
 - README.md (Features, Installation)
 - l10n/de.json + en.json (Grundbestand)
 - DB-Migrationen, Settings-Seite, Build (`npx vite build` läuft)
-- Git-Commit + Tag v1.0.0 lokal (Push fehlt noch – kein Remote konfiguriert)
+- Repo auf GitHub (master + Tag v1.0.0), Release als Pre-release, CI grün
