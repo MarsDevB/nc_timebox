@@ -25,9 +25,10 @@ Stand: 2026-09-05 · Repo: https://github.com/MarsDevB/nc_timebox (master gepush
 - [x] Tarball lokal getestet: `make dist` → `dist/timebox-1.0.0.tar.gz` (144K, sauberer Inhalt) ✅
 
 ## 5. Screenshots & Doku (empfohlen)
-- [ ] 1–3 Screenshots der App erstellen (PNG, ideal 1350×770)
-- [ ] In das Repo (`docs/img/` oder Screenshots bei einem Release/hosten)
-- [ ] In `info.xml` unter `<screenshots>` eintragen
+- [x] 1–3 Screenshots der App erstellt und im Repo unter `docs/img/Screenshot_1–5.png` abgelegt ✅
+- [x] In `info.xml` unter `<screenshots>` eingetragen ✅ (Screenshot_1–3 via raw.githubusercontent.com;
+      ⚠️ Info.xml-Änderung ist NACH dem Tag v1.0.0 – falls gewünscht: `git push` master, Tag ggf. mit
+      `git tag -f v1.0.0 && git push origin v1.0.0 --force` auf den neuesten Stand bringen)
 
 ## 6. App-Signatur (Pflicht für Store)
 - [ ] Schlüssel + CSR lokal erzeugen:
