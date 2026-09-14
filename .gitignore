@@ -8,3 +8,5 @@ css/timebox.css.map
 *~
 .vite
 dist/
+timebox.csr
+timebox.key
