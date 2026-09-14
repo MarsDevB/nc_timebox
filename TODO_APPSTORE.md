@@ -45,8 +45,8 @@ Stand: 2026-09-05 · Repo: https://github.com/MarsDevB/nc_timebox (master gepush
       CSR-Inhalt einfügen → committen → Pull Request öffnen.
       Nice to have: Link zur App-Source, also https://github.com/MarsDevB/nc_timebox.
       Keine Person mentionen – Subscriber kommen von selbst.)
-- [ ] Nach Merge: Zertifikat von apps.nextcloud.com abrufen / PR-Antwort entnehmen →
-      speichern als `~/.nextcloud/certificates/timebox.crt`
+- [x] Nach Merge: Zertifikat von apps.nextcloud.com abrufen / PR-Antwort entnehmen →
+      speichern als `~/.nextcloud/certificates/timebox.crt` ✅ (erledigt 2026-09-14)
 - [ ] App-Registrierung auf https://apps.nextcloud.com (GitHub-Login), Formular füllen:
       - **Public certificate**: kompletter Inhalt der `timebox.crt` (mit BEGIN/END-Zeilen)
       - **Signature over your app's ID**:
@@ -55,19 +55,17 @@ Stand: 2026-09-05 · Repo: https://github.com/MarsDevB/nc_timebox (master gepush
         ```
       - ⚠️ `.key` NIEMALS hochladen, `.csr` nur im Zertifikats-PR!
       - ⚠️ Zertifikat-Update im Formular löscht alle vorhandenen Releases → Key sicher backupen!
-- [ ] Signieren (im Nextcloud-Container, wo `occ` läuft):
+- [x] Signieren (im Nextcloud-Container, wo `occ` läuft) ✅ (erledigt 2026-09-14)
+      ⚠️ Wichtig: saubere Kopie ohne `.git`/Build-Artefakte signieren (sonst landen
+      .git-Hashes in der signature.json und der Store-Build schlägt fehl):
       ```bash
-      occ integrity:sign-app \
-        --path=/pfad/zu/custom_apps/timebox \
-        --certificateFile=~/.nextcloud/certificates/timebox.crt \
-        --privateKeyFile=~/.nextcloud/certificates/timebox.key
+      docker exec -u www-data basicApp php occ integrity:sign-app \
+        --path=/pfad/zur/sauberen/kopie/timebox \
+        --certificate=/tmp/timebox.crt --privateKey=/tmp/timebox.key
       ```
-- [ ] Erzeugt `appinfo/certificate.pem` + `appinfo/signature.json` → committen
-- [ ] Tag `v1.0.0` auf den Signatur-Commit verschieben und pushen:
-      ```bash
-      git tag -f v1.0.0 -m "Release 1.0.0"
-      git push origin master v1.0.0 --force
-      ```
+- [x] Erzeugt `appinfo/signature.json` → committet ✅ (b2d22c5; Verifikation:
+      alle 33 Hashes deckungsgleich mit Tarball `dist/timebox-1.0.0.tar.gz`)
+- [x] Tag `v1.0.0` auf den Signatur-Commit verschoben und gepusht ✅ (b6897bc)
 - [ ] ⚠️ Muss bei JEDEM Release neu gemacht werden (Versionsnummer ändert sich!) –
       Reihenfolge immer: **erst signieren, dann Tarball bauen / Tag pushen**
 
